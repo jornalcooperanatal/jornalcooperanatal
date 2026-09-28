@@ -8,7 +8,33 @@ $("logout").onclick=async()=>{await api("/api/logout",{method:"POST"}).catch(()=
 document.querySelectorAll(".admin-side button[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".admin-side button[data-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".tab").forEach(x=>x.style.display=x.id===b.dataset.tab?"block":"none")});
 
 async function upload(input){
- const f=input.files[0];if(!f)return null;const fd=new FormData();fd.append("file",f);const r=await fetch("/api/upload",{method:"POST",body:fd});if(!r.ok)throw new Error(await r.text());return (await r.json()).url;
+ const f=input.files[0];
+ if(!f)return null;
+ if(!f.type.startsWith("image/"))throw new Error("Selecione um arquivo de imagem.");
+ if(f.size>12*1024*1024)throw new Error("Use uma imagem de até 12 MB.");
+ const bitmap=await createImageBitmap(f);
+ const maxSide=1500;
+ let w=bitmap.width,h=bitmap.height;
+ if(w>maxSide||h>maxSide){
+   const scale=Math.min(maxSide/w,maxSide/h);
+   w=Math.max(1,Math.round(w*scale));
+   h=Math.max(1,Math.round(h*scale));
+ }
+ const canvas=document.createElement("canvas");
+ canvas.width=w;canvas.height=h;
+ const ctx=canvas.getContext("2d",{alpha:false});
+ ctx.fillStyle="#ffffff";
+ ctx.fillRect(0,0,w,h);
+ ctx.drawImage(bitmap,0,0,w,h);
+ if(bitmap.close)bitmap.close();
+ let quality=.82;
+ let data=canvas.toDataURL("image/webp",quality);
+ while(data.length>900000 && quality>.48){
+   quality-=.08;
+   data=canvas.toDataURL("image/webp",quality);
+ }
+ if(data.length>1100000)throw new Error("A imagem ficou muito grande mesmo após compressão. Escolha uma foto menor.");
+ return data;
 }
 async function loadAll(){DATA=await api("/api/admin-data");renderAll()}
 function renderAll(){renderInbox();renderArticles();renderCoops();renderLinks();renderAds();renderFaq();renderSettings();renderStats();}
