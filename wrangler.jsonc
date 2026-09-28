@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "jornal-coopera-natal",
+  "name": "jornalcooperanatal",
   "main": "./src/index.js",
   "compatibility_date": "2026-09-28",
   "assets": {
@@ -11,13 +11,7 @@
     {
       "binding": "DB",
       "database_name": "jornal-coopera-natal",
-      "database_id": "COLOQUE_AQUI_O_DATABASE_ID"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA",
-      "bucket_name": "jornal-coopera-natal-media"
+      "database_id": "0cf4d81c-79c1-4d90-aa85-3a3a70d5c31c"
     }
   ]
 }
