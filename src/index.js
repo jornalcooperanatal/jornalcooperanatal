@@ -11,7 +11,6 @@ async function isAdmin(req,env){
 }
 async function requireAdmin(req,env){if(!(await isAdmin(req,env)))return bad("Não autorizado",401);return null}
 async function readJson(req){try{return await req.json()}catch{return null}}
-function slugKey(name){const ext=(name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"");return `uploads/${Date.now()}-${crypto.randomUUID()}.${ext}`}
 function allowedTable(x){return ["articles","links","cooperatives","faqs","ads"].includes(x)}
 function sqlEntity(entity){
  const map={
@@ -92,19 +91,6 @@ if(p==="/api/track"&&req.method==="POST"){
    const id=Number(b.id||0);
    await env.DB.prepare(`INSERT INTO analytics(event_type,item_id,count) VALUES(?,?,1) ON CONFLICT(event_type,item_id) DO UPDATE SET count=count+1`).bind(b.type,id).run();
    return json({ok:true});
-  }
-
-  if(p.startsWith("/media/")){
-   const key=p.replace(/^\/media\//,"");const o=await env.MEDIA.get(key);if(!o)return new Response("Not found",{status:404});
-   const h=new Headers();o.writeHttpMetadata(h);h.set("etag",o.httpEtag);h.set("Cache-Control","public, max-age=31536000, immutable");return new Response(o.body,{headers:h});
-  }
-
-  if(p==="/api/upload"&&req.method==="POST"){
-   const deny=await requireAdmin(req,env);if(deny)return deny;
-   const form=await req.formData();const f=form.get("file");if(!f||typeof f==="string")return bad("Arquivo ausente");
-   if(f.size>5*1024*1024)return bad("Imagem maior que 5 MB");
-   const key=slugKey(f.name);await env.MEDIA.put(key,f.stream(),{httpMetadata:{contentType:f.type||"application/octet-stream"}});
-   return json({url:`/media/${key}`});
   }
 
   if(p==="/api/admin-data"){
