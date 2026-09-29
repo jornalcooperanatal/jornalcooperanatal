@@ -48,9 +48,9 @@ $("clearArticle").onclick=()=>{$("articleForm").reset();$("artId").value="";$("a
 $("articleForm").onsubmit=async e=>{e.preventDefault();let image=$("artImage").value;if($("artUpload").files[0])image=await upload($("artUpload"));const obj={id:$("artId").value||null,title:$("artTitle").value,summary:$("artSummary").value,category:$("artCategory").value,author:$("artAuthor").value,published_at:$("artDate").value,status:$("artStatus").value,featured:+$("artFeatured").value,content_type:$("artType").value,image_url:image,body_html:$("artContent").value,youtube_url:$("artYoutube").value,extra_label:$("artExtraLabel").value,extra_url:$("artExtraUrl").value,source_name:$("artSourceName").value,source_url:$("artSourceUrl").value};await saveEntity("articles",obj);$("clearArticle").click();await loadAll()};
 
 function renderCoops(){$("coopRows").innerHTML=(DATA.cooperatives||[]).map(x=>`<tr><td><b>${Number(x.sort_order||100)}</b></td><td>${esc(x.name)}</td><td>${esc(x.type||"")}</td><td>${esc(x.website||"")}</td><td><button class="btn light" onclick="editCoop(${x.id})">Editar</button> <button class="btn" onclick="delRow('cooperatives',${x.id})">Excluir</button></td></tr>`).join("")}
-window.editCoop=id=>{const x=DATA.cooperatives.find(a=>a.id===id);$("coopId").value=x.id;$("coopName").value=x.name||"";$("coopType").value=x.type||"";$("coopOrder").value=Number(x.sort_order||100);$("coopDesc").value=x.description||"";$("coopWebsite").value=x.website||"";$("coopInstagram").value=x.instagram||"";$("coopImage").value=x.image_url||"";$("coopActive").value=x.active?1:0};
-$("clearCoop").onclick=()=>{$("coopForm").reset();$("coopId").value="";$("coopOrder").value=100};
-$("coopForm").onsubmit=async e=>{e.preventDefault();let image=$("coopImage").value;if($("coopUpload").files[0])image=await upload($("coopUpload"));await saveEntity("cooperatives",{id:$("coopId").value||null,name:$("coopName").value,type:$("coopType").value,sort_order:+$("coopOrder").value||100,description:$("coopDesc").value,website:$("coopWebsite").value,instagram:$("coopInstagram").value,image_url:image,active:+$("coopActive").value});$("clearCoop").click();await loadAll()};
+window.editCoop=id=>{const x=DATA.cooperatives.find(a=>a.id===id);$("coopId").value=x.id;$("coopName").value=x.name||"";$("coopType").value=x.type||"";$("coopOrder").value=Number(x.sort_order||100);$("coopColor").value=x.brand_color||"#0b4f84";$("coopColorText").value=x.brand_color||"#0b4f84";$("coopDesc").value=x.description||"";$("coopWebsite").value=x.website||"";$("coopInstagram").value=x.instagram||"";$("coopImage").value=x.image_url||"";$("coopActive").value=x.active?1:0};
+$("clearCoop").onclick=()=>{$("coopForm").reset();$("coopId").value="";$("coopOrder").value=100;$("coopColor").value="#0b4f84";$("coopColorText").value="#0b4f84"};
+$("coopForm").onsubmit=async e=>{e.preventDefault();let image=$("coopImage").value;if($("coopUpload").files[0])image=await upload($("coopUpload"));await saveEntity("cooperatives",{id:$("coopId").value||null,name:$("coopName").value,type:$("coopType").value,sort_order:+$("coopOrder").value||100,brand_color:$("coopColorText").value||$("coopColor").value||"#0b4f84",description:$("coopDesc").value,website:$("coopWebsite").value,instagram:$("coopInstagram").value,image_url:image,active:+$("coopActive").value});$("clearCoop").click();await loadAll()};
 
 function renderLinks(){$("linkRows").innerHTML=(DATA.links||[]).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.category||"")}</td><td>${x.clicks||0}</td><td><button class="btn light" onclick="editLink(${x.id})">Editar</button> <button class="btn" onclick="delRow('links',${x.id})">Excluir</button></td></tr>`).join("")}
 window.editLink=id=>{const x=DATA.links.find(a=>a.id===id);$("linkId").value=x.id;$("linkName").value=x.name||"";$("linkCategory").value=x.category||"";$("linkDesc").value=x.description||"";$("linkUrl").value=x.url||"";$("linkActive").value=x.active?1:0};
@@ -111,3 +111,13 @@ window.deleteMessage=async id=>{
  await api(`/api/messages/${id}`,{method:"DELETE"});await loadAll();$("messageView").innerHTML='<div class="note">Mensagem excluída.</div>';
 };
 const refreshInbox=$("refreshInbox");if(refreshInbox)refreshInbox.onclick=()=>loadAll();
+
+const coopColorEl=document.getElementById("coopColor");
+const coopColorTextEl=document.getElementById("coopColorText");
+if(coopColorEl&&coopColorTextEl){
+  coopColorEl.addEventListener("input",()=>{coopColorTextEl.value=coopColorEl.value});
+  coopColorTextEl.addEventListener("input",()=>{
+    const v=coopColorTextEl.value.trim();
+    if(/^#[0-9a-fA-F]{6}$/.test(v))coopColorEl.value=v;
+  });
+}
