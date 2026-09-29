@@ -152,7 +152,7 @@ function render(){
  const side=arts.slice(1,3);$("heroSide").innerHTML=side.map(a=>`<article class="side-story" onclick="openArticle(${a.id})">${a.image_url?`<img src="${esc(a.image_url)}" alt="">`:""}<div><div class="cat">${esc(a.category)}</div><h3>${esc(a.title)}</h3><p>${esc(a.summary)}</p></div></article>`).join("");
  $("newsGrid").innerHTML=arts.filter(a=>a.content_type!=="entrevista").slice(0,12).map(articleCard).join("");
  $("interviewGrid").innerHTML=arts.filter(a=>a.content_type==="entrevista"||a.category==="Entrevistas").slice(0,9).map(articleCard).join("")||"<p>Nenhuma entrevista publicada ainda.</p>";
- $("coopGrid").innerHTML=(DATA.cooperatives||[]).map(c=>`<article class="coop-card">${c.image_url?`<img src="${esc(c.image_url)}" alt="">`:""}<div class="coop-body"><div class="cat">${esc(c.type||"Cooperativa")}</div><h3>${esc(c.name)}</h3><p>${esc(c.description||"")}</p>${c.website?`<a class="btn primary" target="_blank" rel="noopener" href="${esc(c.website)}" onclick="track('coop',${c.id})">Conhecer</a>`:""} ${c.instagram?`<a class="btn light" target="_blank" rel="noopener" href="${esc(c.instagram)}" onclick="track('coop',${c.id})">Instagram</a>`:""}</div></article>`).join("");
+ renderCooperatives();
  $("linkGrid").innerHTML=(DATA.links||[]).map(x=>`<a class="link-card" target="_blank" rel="noopener" href="${esc(x.url)}" onclick="track('link',${x.id})"><b>${esc(x.name)}</b><span>${esc(x.description||"")}</span><em>${esc(x.category||"Serviço")} →</em></a>`).join("");
  $("faqList").innerHTML=(DATA.faqs||[]).map((f,i)=>`<details ${i===0?"open":""}><summary>${esc(f.question)}</summary><p>${esc(f.answer)}</p></details>`).join("");
  renderAds();
