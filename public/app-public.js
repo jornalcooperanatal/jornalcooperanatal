@@ -236,6 +236,7 @@ function cooperativeSearchBlob(c){
   ].filter(Boolean).join(" "));
 }
 
+
 function renderCooperatives(){
   const grid = $("coopGrid");
   if(!grid) return;
@@ -246,18 +247,10 @@ function renderCooperatives(){
   const search = normalizeSearchText(COOP_FILTER_TEXT);
 
   const all = [...(DATA.cooperatives || [])].sort((a,b) => {
-    const ao = Number.isFinite(Number(a.sort_order))
-      ? Number(a.sort_order)
-      : 100;
-
-    const bo = Number.isFinite(Number(b.sort_order))
-      ? Number(b.sort_order)
-      : 100;
-
+    const ao = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 100;
+    const bo = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 100;
     if(ao !== bo) return ao - bo;
-
-    return String(a.name || "")
-      .localeCompare(String(b.name || ""), "pt-BR");
+    return String(a.name || "").localeCompare(String(b.name || ""), "pt-BR");
   });
 
   const list = all.filter(c => {
@@ -266,8 +259,7 @@ function renderCooperatives(){
       String(c.type || "Outros") === COOP_FILTER_TYPE;
 
     const matchesText =
-      !search ||
-      cooperativeSearchBlob(c).includes(search);
+      !search || cooperativeSearchBlob(c).includes(search);
 
     return matchesType && matchesText;
   });
@@ -290,9 +282,9 @@ function renderCooperatives(){
   }
 
   grid.innerHTML = list.map(c => `
-    <article class="coop-card">
+    <article class="coop-card coop-card-vertical">
 
-      <div class="coop-media">
+      <div class="coop-media coop-media-top">
         ${
           c.image_url
             ? `
@@ -310,18 +302,29 @@ function renderCooperatives(){
         }
       </div>
 
-      <div class="coop-body">
+      <div class="coop-body coop-body-centered">
         <div class="coop-topline">
-          <span class="cat">
-            ${esc(c.type || "Cooperativa")}
-          </span>
+          <span class="cat">${esc(c.type || "Cooperativa")}</span>
         </div>
 
         <h3>${esc(c.name || "")}</h3>
 
-        <p class="coop-description">
+        <p
+          class="coop-description coop-description-clamp"
+          id="coopDesc-${Number(c.id) || 0}"
+        >
           ${esc(c.description || "")}
         </p>
+
+        <div class="coop-readmore-wrap">
+          <button
+            type="button"
+            class="coop-readmore"
+            onclick="toggleCoopText(${Number(c.id) || 0}, this)"
+          >
+            Leia mais
+          </button>
+        </div>
 
         <div class="coop-actions">
           ${
@@ -357,11 +360,103 @@ function renderCooperatives(){
           }
         </div>
       </div>
-
     </article>
   `).join("");
 }
 
+function toggleCoopText(id, btn){
+  const el = $("coopDesc-" + id);
+  if(!el || !btn) return;
+
+  const expanded = el.classList.toggle("coop-description-expanded");
+  el.classList.toggle("coop-description-clamp", !expanded);
+  btn.textContent = expanded ? "Ler menos" : "Leia mais";
+}
+
+let LINK_FILTER_TEXT = "";
+
+function ensureLinkControls(){
+  const grid = $("linkGrid");
+  if(!grid || $("linkTools")) return;
+
+  const tools = document.createElement("div");
+  tools.id = "linkTools";
+  tools.className = "link-tools";
+
+  tools.innerHTML = `
+    <div class="link-search-box">
+      <span class="link-search-icon">⌕</span>
+      <input
+        id="linkSearch"
+        type="search"
+        placeholder="Pesquisar link útil por nome, categoria ou palavra-chave..."
+        autocomplete="off"
+      >
+    </div>
+    <div class="link-total" id="linkTotal"></div>
+  `;
+
+  grid.parentNode.insertBefore(tools, grid);
+
+  $("linkSearch").addEventListener("input", e => {
+    LINK_FILTER_TEXT = e.target.value || "";
+    renderLinks();
+  });
+}
+
+function renderLinks(){
+  const grid = $("linkGrid");
+  if(!grid) return;
+
+  ensureLinkControls();
+
+  const all = DATA.links || [];
+  const q = normalizeSearchText(LINK_FILTER_TEXT);
+
+  const list = all.filter(x => {
+    const blob = normalizeSearchText([
+      x.name,
+      x.category,
+      x.description,
+      x.url
+    ].filter(Boolean).join(" "));
+    return !q || blob.includes(q);
+  });
+
+  if($("linkTotal")){
+    $("linkTotal").textContent =
+      list.length === all.length
+        ? `${all.length} link${all.length === 1 ? "" : "s"}`
+        : `${list.length} de ${all.length}`;
+  }
+
+  grid.innerHTML =
+    list.length
+      ? list.map(x => `
+          <a
+            class="link-card"
+            target="_blank"
+            rel="noopener"
+            href="${esc(x.url || "#")}"
+            onclick="track('link', ${Number(x.id) || 0})"
+          >
+            <b>${esc(x.name || "")}</b>
+
+            <span>
+              ${esc(x.description || "")}
+            </span>
+
+            <em>
+              ${esc(x.category || "Serviço")} →
+            </em>
+          </a>
+        `).join("")
+      : `
+        <div class="empty-state">
+          Nenhum link útil encontrado para essa pesquisa.
+        </div>
+      `;
+}
 
 function render(){
   const s = DATA.settings || {};
@@ -452,36 +547,7 @@ function render(){
   renderCooperatives();
 
   /* LINKS ÚTEIS */
-  if($("linkGrid")){
-    const links = DATA.links || [];
-
-    $("linkGrid").innerHTML =
-      links.length
-        ? links.map(x => `
-            <a
-              class="link-card"
-              target="_blank"
-              rel="noopener"
-              href="${esc(x.url || "#")}"
-              onclick="track('link', ${Number(x.id) || 0})"
-            >
-              <b>${esc(x.name || "")}</b>
-
-              <span>
-                ${esc(x.description || "")}
-              </span>
-
-              <em>
-                ${esc(x.category || "Serviço")} →
-              </em>
-            </a>
-          `).join("")
-        : `
-          <div class="empty-state">
-            Nenhum link útil cadastrado como ativo.
-          </div>
-        `;
-  }
+  renderLinks();
 
   /* DÚVIDAS */
   if($("faqList")){
