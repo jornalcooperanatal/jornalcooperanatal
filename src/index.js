@@ -22,17 +22,47 @@ function sqlEntity(entity){
  };return map[entity]
 }
 
-async function hasCoopSortOrder(env){
+async function coopColumns(env){
  try{
   const info=await env.DB.prepare("PRAGMA table_info(cooperatives)").all();
-  return (info.results||[]).some(x=>x.name==="sort_order");
+  return new Set((info.results||[]).map(x=>x.name));
  }catch{
-  return false;
+  return new Set();
  }
 }
 
+async function ensureCoopColumns(env){
+ let cols=await coopColumns(env);
+
+ if(!cols.has("sort_order")){
+  try{
+   await env.DB.prepare("ALTER TABLE cooperatives ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 100").run();
+  }catch(e){
+   console.log("sort_order migration:",String(e));
+  }
+ }
+
+ cols=await coopColumns(env);
+
+ if(!cols.has("brand_color")){
+  try{
+   await env.DB.prepare("ALTER TABLE cooperatives ADD COLUMN brand_color TEXT DEFAULT '#0b4f84'").run();
+  }catch(e){
+   console.log("brand_color migration:",String(e));
+  }
+ }
+
+ return await coopColumns(env);
+}
+
+async function hasCoopSortOrder(env){
+ const cols=await ensureCoopColumns(env);
+ return cols.has("sort_order");
+}
+
 async function getCooperatives(env,activeOnly=false){
- const hasOrder=await hasCoopSortOrder(env);
+ const cols=await ensureCoopColumns(env);
+ const hasOrder=cols.has("sort_order");
  const where=activeOnly?" WHERE active=1":"";
  const order=hasOrder
    ?" ORDER BY COALESCE(sort_order,100) ASC, name ASC"
@@ -40,14 +70,25 @@ async function getCooperatives(env,activeOnly=false){
  return env.DB.prepare(`SELECT * FROM cooperatives${where}${order}`).all();
 }
 async function upsert(env,entity,obj){
- let cols=sqlEntity(entity); if(!cols)return null;
+ let cols=sqlEntity(entity);
+ if(!cols)return null;
 
- if(entity==="cooperatives" && await hasCoopSortOrder(env)){
-  cols=[...cols.slice(0,2),"sort_order",...cols.slice(2)];
+ if(entity==="cooperatives"){
+  const existing=await ensureCoopColumns(env);
+
+  if(existing.has("sort_order") && !cols.includes("sort_order")){
+   cols=[...cols.slice(0,2),"sort_order",...cols.slice(2)];
+  }
+
+  cols=cols.filter(c=>existing.has(c));
  }
 
  const vals=cols.map(c=>{
   if(c==="sort_order")return Number(obj[c]||100);
+  if(c==="brand_color"){
+   const v=String(obj[c]||"#0b4f84").trim();
+   return /^#[0-9a-fA-F]{6}$/.test(v)?v:"#0b4f84";
+  }
   return obj[c]??(["featured","active"].includes(c)?0:"");
  });
 
