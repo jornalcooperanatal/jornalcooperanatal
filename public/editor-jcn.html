@@ -56,9 +56,9 @@
   <label>Tratamento da logo</label>
   <label style="display:flex;align-items:center;gap:8px;min-height:42px">
     <input id="coopRemoveWhite" type="checkbox" checked style="width:auto">
-    <span>Remover fundo branco da logo</span>
+    <span>Remover fundo branco e recortar margens</span>
   </label>
-  <div class="note">Use esta opção quando a imagem tiver um fundo branco. A logo será salva com transparência para ficar integrada sobre a cor predominante.</div>
+  <div class="note">Use esta opção quando a imagem tiver fundo branco ou cinza-claro. O sistema remove apenas o fundo conectado às bordas, preserva a marca e recorta as margens para a logo ficar diretamente sobre a cor predominante.</div>
 </div><div class="field"><label>Ativo</label><select id="coopActive"><option value="1">Sim</option><option value="0">Não</option></select></div></div><button class="btn primary" style="margin-top:10px">Salvar</button><button type="button" class="btn light" id="clearCoop">Novo</button></form></div><div class="admin-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Ordem</th><th>Nome</th><th>Ramo</th><th>Site</th><th>Ações</th></tr></thead><tbody id="coopRows"></tbody></table></div></div></section>
 
 <section class="tab" id="links" style="display:none"><div class="admin-card"><h2>Cadastrar link útil</h2><form id="linkForm"><input type="hidden" id="linkId"><div class="form-grid"><div class="field"><label>Nome</label><input id="linkName" required></div><div class="field"><label>Categoria</label><input id="linkCategory"></div><div class="field full"><label>Descrição</label><input id="linkDesc"></div><div class="field full"><label>Link</label><input id="linkUrl" required></div><div class="field"><label>Ativo</label><select id="linkActive"><option value="1">Sim</option><option value="0">Não</option></select></div></div><button class="btn primary" style="margin-top:10px">Salvar</button><button type="button" class="btn light" id="clearLink">Novo</button></form></div><div class="admin-card"><table class="admin-table"><thead><tr><th>Nome</th><th>Categoria</th><th>Cliques</th><th>Ações</th></tr></thead><tbody id="linkRows"></tbody></table></div></section>
