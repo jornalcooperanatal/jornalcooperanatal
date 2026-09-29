@@ -5,15 +5,16 @@
 <div class="topline"><div class="container"><span>COOPERATIVISMO • TRABALHO • ECONOMIA • SERVIÇOS</span><span>Natal • Rio Grande do Norte</span></div></div>
 <header class="masthead"><div class="container mast-row"><div class="kicker">Portal de informação e utilidade</div><div class="brand" id="brand">Jornal Coopera Natal</div><div class="tagline" id="tagline"></div></div></header>
 <nav class="nav"><div class="container">
-<a href="#inicio">Capa</a><a href="#comparador">CLT x Cooperativa</a><a href="#noticias">Notícias</a><a href="#entrevistas">Entrevistas</a><a href="#cooperativas">Cooperativas</a><a href="#links">Links úteis</a><a href="#faq">Dúvidas</a><a href="#contato">Contato</a>
+<button type="button" class="nav-tab active" data-tab="capa">Capa</button><button type="button" class="nav-tab" data-tab="comparador">CLT x Cooperativa</button><button type="button" class="nav-tab" data-tab="noticias">Notícias</button><button type="button" class="nav-tab" data-tab="entrevistas">Entrevistas</button><button type="button" class="nav-tab" data-tab="cooperativas">Cooperativas</button><button type="button" class="nav-tab" data-tab="links">Links úteis</button><button type="button" class="nav-tab" data-tab="faq">Dúvidas</button><button type="button" class="nav-tab" data-tab="contato">Contato</button>
 </div></nav>
 <div class="breaking"><div class="container"><b>Agora</b><span id="breakingText"></span></div></div>
 <main class="container" id="inicio">
+<section id="capa" class="portal-tab active">
 <div id="adTop"></div>
 <section class="hero"><article class="hero-main" id="heroMain"><img id="heroImg" alt=""><div class="hero-overlay"><div class="cat" id="heroCat"></div><h1 class="hero-title" id="heroTitle"></h1><div class="hero-summary" id="heroSummary"></div></div></article><div class="hero-side" id="heroSide"></div></section>
+</section>
 
-
-<section id="comparador" class="compare-section">
+<section id="comparador" class="compare-section portal-tab">
   <div class="section-head">
     <h2>CLT x Cooperativa</h2>
     <span>Simulação automática de custo, jornada e cobertura</span>
@@ -47,7 +48,7 @@
       </div>
     </div>
 
-    <div class="sim-grid sim-grid-4">
+    <div class="sim-grid sim-grid-5">
       <div class="sim-field">
         <label>Ramo da atividade</label>
         <select id="simRamo"></select>
@@ -56,6 +57,12 @@
       <div class="sim-field">
         <label>Cargo / atividade</label>
         <select id="simCargo"></select>
+      </div>
+
+      <div class="sim-field">
+        <label>Piso / enquadramento aplicável</label>
+        <select id="simPiso"></select>
+        <small id="simPisoNota">O sistema mostra apenas referências oficiais cadastradas. Quando houver mais de uma possibilidade, escolha o enquadramento correto.</small>
       </div>
 
       <div class="sim-field">
@@ -81,21 +88,21 @@
       <div class="sim-field">
         <label>Periculosidade</label>
         <select id="simPericulosidade">
-          <option value="0">Não aplicar</option>
+          <option value="0">Não se aplica</option>
           <option value="30">30%</option>
         </select>
-        <small id="simPericNota">Aplicada automaticamente a atividades em motocicleta.</small>
+        <small id="simPericNota">Motofretista/motociclista profissional: 30% automaticamente. Em outros cargos, selecione somente quando aplicável.</small>
       </div>
 
       <div class="sim-field">
         <label>Insalubridade</label>
         <select id="simInsalubridade">
-          <option value="0">Não caracterizada</option>
+          <option value="0">Não se aplica</option>
           <option value="10">10% — grau mínimo</option>
           <option value="20">20% — grau médio</option>
           <option value="40">40% — grau máximo</option>
         </select>
-        <small>Somente quando caracterizada conforme a norma aplicável.</small>
+        <small>Selecione somente quando a atividade estiver caracterizada como insalubre.</small>
       </div>
 
       <div class="sim-field">
@@ -315,21 +322,17 @@
 </section>
 
 
-<section id="noticias"><div class="section-head"><h2>Últimas notícias</h2><span>Atualizações do portal</span></div><div class="news-grid" id="newsGrid"></div></section>
-<article class="article-view" id="articleView"></article>
+<section id="noticias" class="portal-tab"><div class="section-head"><h2>Últimas notícias</h2><span>Atualizações do portal</span></div><div class="news-grid" id="newsGrid"></div><article class="article-view" id="articleView"></article></section>
 
-<section id="entrevistas"><div class="section-head"><h2>Entrevistas</h2><span>Conversas, vídeos e histórias</span></div><div class="news-grid" id="interviewGrid"></div></section>
+<section id="entrevistas" class="portal-tab"><div class="section-head"><h2>Entrevistas</h2><span>Conversas, vídeos e histórias</span></div><div class="news-grid" id="interviewGrid"></div></section>
 <div id="adMiddle"></div>
 
-<section id="cooperativas"><div class="section-head"><h2>Conheça as Cooperativas de Natal</h2><span>Perfis e links oficiais</span></div><div class="coop-grid" id="coopGrid"></div></section>
+<section id="cooperativas" class="portal-tab"><div class="section-head"><h2>Conheça as Cooperativas de Natal</h2><span>Perfis e links oficiais</span></div><div class="coop-grid" id="coopGrid"></div></section>
 
-<div class="layout">
-<section id="links"><div class="section-head"><h2>Links úteis</h2><span>Serviços, cursos, certidões e documentos</span></div><div class="box"><div class="links-grid" id="linkGrid"></div></div></section>
-<section id="faq"><div class="section-head"><h2>Dúvidas</h2><span>Respostas rápidas</span></div><div class="faq-box" id="faqList"></div></section>
-</div>
+<section id="links" class="portal-tab"><div class="section-head"><h2>Links úteis</h2><span>Serviços, cursos, certidões e documentos</span></div><div class="box"><div class="links-grid" id="linkGrid"></div></div></section>
+<section id="faq" class="portal-tab"><div class="section-head"><h2>Dúvidas</h2><span>Respostas rápidas</span></div><div class="faq-box" id="faqList"></div></section>
 
-
-<section id="contato">
+<section id="contato" class="portal-tab">
  <div class="section-head"><h2>Fale com o Jornal Coopera Natal</h2><span>Envie sua dúvida, sugestão, pauta ou proposta de divulgação</span></div>
  <div class="contact-layout">
   <div class="box">
