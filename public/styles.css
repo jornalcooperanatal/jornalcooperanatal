@@ -686,6 +686,7 @@ button,input,select,textarea{
 
 .coop-media-top{
   min-height:180px;
+  isolation:isolate;
   padding:24px 22px 18px;
   border-bottom:1px solid var(--line);
   background:
@@ -698,8 +699,8 @@ button,input,select,textarea{
 
 .coop-media img{
   width:100%;
-  max-width:190px;
-  max-height:130px;
+  max-width:230px;
+  max-height:145px;
   object-fit:contain;
   object-position:center;
   display:block;
