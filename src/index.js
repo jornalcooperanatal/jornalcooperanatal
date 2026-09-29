@@ -16,7 +16,7 @@ function sqlEntity(entity){
  const map={
   articles:["title","summary","category","author","published_at","status","featured","content_type","image_url","body_html","youtube_url","extra_label","extra_url","source_name","source_url"],
   links:["name","category","description","url","active"],
-  cooperatives:["name","type","description","website","instagram","image_url","active"],
+  cooperatives:["name","type","description","website","instagram","image_url","brand_color","active"],
   faqs:["question","answer"],
   ads:["name","title","body","placement","target_url","image_url","active"]
  };return map[entity]
