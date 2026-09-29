@@ -5,12 +5,315 @@
 <div class="topline"><div class="container"><span>COOPERATIVISMO • TRABALHO • ECONOMIA • SERVIÇOS</span><span>Natal • Rio Grande do Norte</span></div></div>
 <header class="masthead"><div class="container mast-row"><div class="kicker">Portal de informação e utilidade</div><div class="brand" id="brand">Jornal Coopera Natal</div><div class="tagline" id="tagline"></div></div></header>
 <nav class="nav"><div class="container">
-<a href="#inicio">Capa</a><a href="#noticias">Notícias</a><a href="#entrevistas">Entrevistas</a><a href="#cooperativas">Cooperativas</a><a href="#links">Links úteis</a><a href="#faq">Dúvidas</a><a href="#contato">Contato</a>
+<a href="#inicio">Capa</a><a href="#comparador">CLT x Cooperativa</a><a href="#noticias">Notícias</a><a href="#entrevistas">Entrevistas</a><a href="#cooperativas">Cooperativas</a><a href="#links">Links úteis</a><a href="#faq">Dúvidas</a><a href="#contato">Contato</a>
 </div></nav>
 <div class="breaking"><div class="container"><b>Agora</b><span id="breakingText"></span></div></div>
 <main class="container" id="inicio">
 <div id="adTop"></div>
 <section class="hero"><article class="hero-main" id="heroMain"><img id="heroImg" alt=""><div class="hero-overlay"><div class="cat" id="heroCat"></div><h1 class="hero-title" id="heroTitle"></h1><div class="hero-summary" id="heroSummary"></div></div></article><div class="hero-side" id="heroSide"></div></section>
+
+
+<section id="comparador" class="compare-section">
+  <div class="section-head">
+    <h2>CLT x Cooperativa</h2>
+    <span>Simulação automática de custo, jornada e cobertura</span>
+  </div>
+
+  <div class="sim-intro">
+    <div>
+      <div class="cat">Comparador de contratação</div>
+      <h3>Quanto custa manter a mesma operação em cada modelo?</h3>
+      <p>
+        Escolha o ramo, o cargo, a jornada e o valor da cooperativa.
+        O simulador calcula salário, adicionais, encargos, quantidade mínima estimada de CLTs,
+        custos mensais e anuais e mostra qual modelo apresenta menor custo financeiro no cenário informado.
+      </p>
+    </div>
+    <div class="sim-badge">
+      <b>Referência 2026</b>
+      <span>Salário mínimo nacional: <strong id="simMinimoLabel">R$ 1.621,00</strong></span>
+      <small>O salário-base continua editável para usar piso de categoria ou convenção coletiva.</small>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <div class="sim-card-title">
+      <div>
+        <span class="sim-step">1</span>
+        <div>
+          <b>Atividade e remuneração</b>
+          <small>O ramo filtra os cargos e ativa adicionais quando a regra é objetiva.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-4">
+      <div class="sim-field">
+        <label>Ramo da atividade</label>
+        <select id="simRamo"></select>
+      </div>
+
+      <div class="sim-field">
+        <label>Cargo / atividade</label>
+        <select id="simCargo"></select>
+      </div>
+
+      <div class="sim-field">
+        <label>Salário mínimo de referência</label>
+        <div class="money-input">
+          <span>R$</span>
+          <input id="simMinimo" type="number" min="0" step="0.01" value="1621">
+        </div>
+        <small>Se este valor mudar, cargos vinculados ao mínimo são atualizados automaticamente.</small>
+      </div>
+
+      <div class="sim-field">
+        <label>Salário-base / piso da categoria</label>
+        <div class="money-input">
+          <span>R$</span>
+          <input id="simSalario" type="number" min="0" step="0.01" value="1621">
+        </div>
+        <small id="simSalarioNota">Referência editável.</small>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-4 sim-top-gap">
+      <div class="sim-field">
+        <label>Periculosidade</label>
+        <select id="simPericulosidade">
+          <option value="0">Não aplicar</option>
+          <option value="30">30%</option>
+        </select>
+        <small id="simPericNota">Aplicada automaticamente a atividades em motocicleta.</small>
+      </div>
+
+      <div class="sim-field">
+        <label>Insalubridade</label>
+        <select id="simInsalubridade">
+          <option value="0">Não caracterizada</option>
+          <option value="10">10% — grau mínimo</option>
+          <option value="20">20% — grau médio</option>
+          <option value="40">40% — grau máximo</option>
+        </select>
+        <small>Somente quando caracterizada conforme a norma aplicável.</small>
+      </div>
+
+      <div class="sim-field">
+        <label>Benefícios mensais pagos pela empresa</label>
+        <div class="money-input">
+          <span>R$</span>
+          <input id="simBeneficios" type="number" min="0" step="0.01" value="0">
+        </div>
+        <small>Vale-alimentação, auxílio, plano e outros custos patronais.</small>
+      </div>
+
+      <div class="sim-field">
+        <label>Equipamento / veículo / combustível</label>
+        <div class="money-input">
+          <span>R$</span>
+          <input id="simEquipamento" type="number" min="0" step="0.01" value="0">
+        </div>
+        <small>Use quando a empresa assume moto, carro, combustível, manutenção ou equipamento.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <div class="sim-card-title">
+      <div>
+        <span class="sim-step">2</span>
+        <div>
+          <b>Jornada e cobertura</b>
+          <small>O cálculo considera 44 horas semanais, limite diário de referência e descanso semanal.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-4">
+      <div class="sim-field">
+        <label>Início da operação</label>
+        <input id="simInicio" type="time" value="08:00">
+      </div>
+
+      <div class="sim-field">
+        <label>Fim da operação</label>
+        <input id="simFim" type="time" value="17:00">
+      </div>
+
+      <div class="sim-field">
+        <label>Dias de funcionamento por semana</label>
+        <select id="simDias">
+          <option value="5">5 dias</option>
+          <option value="6">6 dias</option>
+          <option value="7">7 dias — operação todos os dias</option>
+        </select>
+        <small>Com 7 dias, o simulador exige no mínimo 2 CLTs para permitir revezamento e descanso.</small>
+      </div>
+
+      <div class="sim-field">
+        <label>Feriados trabalhados no mês</label>
+        <input id="simFeriados" type="number" min="0" max="15" step="1" value="0">
+        <small>Calculado com adicional de 100% quando não houver folga compensatória.</small>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-3 sim-top-gap">
+      <label class="sim-check">
+        <input id="simCompensaFeriado" type="checkbox">
+        <span><b>Há folga compensatória nos feriados</b><small>Se marcado, o simulador não aplica dobra automática do feriado.</small></span>
+      </label>
+
+      <label class="sim-check">
+        <input id="simHoraExtraAuto" type="checkbox" checked>
+        <span><b>Calcular horas extras automaticamente</b><small>Acima da jornada normal, usa adicional mínimo de 50% como referência.</small></span>
+      </label>
+
+      <label class="sim-check">
+        <input id="simNoturnoAuto" type="checkbox" checked>
+        <span><b>Calcular adicional noturno</b><small>Considera período urbano entre 22h e 5h e adicional mínimo de 20%.</small></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <div class="sim-card-title">
+      <div>
+        <span class="sim-step">3</span>
+        <div>
+          <b>Custos da contratação</b>
+          <small>A empresa pode adaptar os percentuais ao próprio regime tributário e ao contrato.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-4">
+      <div class="sim-field">
+        <label>Encargo patronal previdenciário de referência</label>
+        <div class="percent-input"><input id="simPatronal" type="number" min="0" max="50" step="0.1" value="20"><span>%</span></div>
+      </div>
+
+      <div class="sim-field">
+        <label>RAT de referência</label>
+        <div class="percent-input"><input id="simRat" type="number" min="0" max="10" step="0.1" value="2"><span>%</span></div>
+      </div>
+
+      <div class="sim-field">
+        <label>Valor mensal do serviço da cooperativa</label>
+        <div class="money-input"><span>R$</span><input id="simCoopValor" type="number" min="0" step="0.01" value="3800"></div>
+      </div>
+
+      <div class="sim-field">
+        <label>Taxa/custeio mensal adicional da cooperativa</label>
+        <div class="money-input"><span>R$</span><input id="simCoopTaxa" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+    </div>
+
+    <div class="sim-grid sim-grid-3 sim-top-gap">
+      <div class="sim-field">
+        <label>Outros custos mensais da cooperativa</label>
+        <div class="money-input"><span>R$</span><input id="simCoopExtra" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+
+      <div class="sim-field">
+        <label>Meses de isenção da taxa no 1º ano</label>
+        <input id="simCoopIsencao" type="number" min="0" max="12" step="1" value="0">
+      </div>
+
+      <label class="sim-check">
+        <input id="simRescisao" type="checkbox">
+        <span><b>Incluir provisão rescisória CLT</b><small>Acrescenta reserva estimativa sobre FGTS para cenário de dispensa sem justa causa.</small></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="sim-results">
+    <div class="sim-result-card">
+      <small>CLTs mínimos estimados</small>
+      <strong id="simQtdClt">1</strong>
+      <span id="simQtdMotivo">Cobertura dentro da referência geral.</span>
+    </div>
+
+    <div class="sim-result-card">
+      <small>Custo mensal CLT</small>
+      <strong id="simCustoClt">R$ 0,00</strong>
+      <span id="simCustoCltAno">R$ 0,00/ano</span>
+    </div>
+
+    <div class="sim-result-card coop">
+      <small>Custo mensal Cooperativa</small>
+      <strong id="simCustoCoop">R$ 0,00</strong>
+      <span id="simCustoCoopAno">R$ 0,00/ano</span>
+    </div>
+
+    <div class="sim-result-card emphasis" id="simResultadoCard">
+      <small id="simResultadoLabel">Diferença mensal</small>
+      <strong id="simDiferenca">R$ 0,00</strong>
+      <span id="simResultadoResumo">Preencha os dados.</span>
+    </div>
+  </div>
+
+  <div id="simAlertaJornada" class="sim-alert"></div>
+
+  <div class="sim-columns">
+    <div class="sim-card">
+      <h3>Como o custo CLT foi formado</h3>
+      <div class="sim-table-wrap">
+        <table class="sim-table">
+          <thead>
+            <tr>
+              <th>Componente</th>
+              <th>Por CLT</th>
+              <th>Operação</th>
+            </tr>
+          </thead>
+          <tbody id="simDetalheClt"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sim-card">
+      <h3>Quanto o empregado recebe</h3>
+      <div class="sim-mini-grid">
+        <div><small>Remuneração bruta estimada</small><b id="simBruto">R$ 0,00</b></div>
+        <div><small>INSS estimado</small><b id="simInss">R$ 0,00</b></div>
+        <div><small>IRRF estimado</small><b id="simIrrf">R$ 0,00</b></div>
+        <div class="blue"><small>Líquido aproximado</small><b id="simLiquido">R$ 0,00</b></div>
+      </div>
+
+      <h3 class="sim-subtitle">Leitura do resultado</h3>
+      <div id="simLeitura" class="sim-reading"></div>
+    </div>
+  </div>
+
+  <div class="sim-card sim-compare-info">
+    <h3>O que muda além do preço</h3>
+    <div class="sim-models">
+      <div>
+        <span class="model-tag">CLT</span>
+        <ul>
+          <li>A empresa administra admissão, folha, jornada, férias, afastamentos e desligamento.</li>
+          <li>Há salário, FGTS, 13º, férias + 1/3, encargos e adicionais quando aplicáveis.</li>
+          <li>A cobertura de faltas, férias e afastamentos precisa ser planejada pela empresa.</li>
+        </ul>
+      </div>
+      <div>
+        <span class="model-tag coop-tag">COOPERATIVA</span>
+        <ul>
+          <li>A empresa contrata o serviço da cooperativa conforme proposta e contrato.</li>
+          <li>A cooperativa pode organizar a cobertura e substituições operacionais dentro do escopo contratado.</li>
+          <li>A relação cooperativa precisa ser legítima e não pode reproduzir subordinação típica de emprego entre contratante e cooperado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="sim-footnote">
+    <b>Importante:</b> o simulador é informativo. Piso salarial, benefícios, adicionais,
+    convenção coletiva, regime tributário, RAT/FAP, insalubridade e regras específicas podem variar.
+    Para cargo com piso próprio, use o valor da categoria no campo salário-base.
+  </div>
+</section>
+
 
 <section id="noticias"><div class="section-head"><h2>Últimas notícias</h2><span>Atualizações do portal</span></div><div class="news-grid" id="newsGrid"></div></section>
 <article class="article-view" id="articleView"></article>
