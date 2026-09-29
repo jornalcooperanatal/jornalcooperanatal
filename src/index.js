@@ -16,18 +16,47 @@ function sqlEntity(entity){
  const map={
   articles:["title","summary","category","author","published_at","status","featured","content_type","image_url","body_html","youtube_url","extra_label","extra_url","source_name","source_url"],
   links:["name","category","description","url","active"],
-  cooperatives:["name","type","sort_order","description","website","instagram","image_url","active"],
+  cooperatives:["name","type","description","website","instagram","image_url","active"],
   faqs:["question","answer"],
   ads:["name","title","body","placement","target_url","image_url","active"]
  };return map[entity]
 }
+
+async function hasCoopSortOrder(env){
+ try{
+  const info=await env.DB.prepare("PRAGMA table_info(cooperatives)").all();
+  return (info.results||[]).some(x=>x.name==="sort_order");
+ }catch{
+  return false;
+ }
+}
+
+async function getCooperatives(env,activeOnly=false){
+ const hasOrder=await hasCoopSortOrder(env);
+ const where=activeOnly?" WHERE active=1":"";
+ const order=hasOrder
+   ?" ORDER BY COALESCE(sort_order,100) ASC, name ASC"
+   :" ORDER BY name ASC";
+ return env.DB.prepare(`SELECT * FROM cooperatives${where}${order}`).all();
+}
 async function upsert(env,entity,obj){
- const cols=sqlEntity(entity); if(!cols)return null;
- const vals=cols.map(c=>obj[c]??(["featured","active"].includes(c)?0:""));
+ let cols=sqlEntity(entity); if(!cols)return null;
+
+ if(entity==="cooperatives" && await hasCoopSortOrder(env)){
+  cols=[...cols.slice(0,2),"sort_order",...cols.slice(2)];
+ }
+
+ const vals=cols.map(c=>{
+  if(c==="sort_order")return Number(obj[c]||100);
+  return obj[c]??(["featured","active"].includes(c)?0:"");
+ });
+
  if(obj.id){
   const set=cols.map(c=>`${c}=?`).join(",");
-  await env.DB.prepare(`UPDATE ${entity} SET ${set} WHERE id=?`).bind(...vals,obj.id).run();return obj.id
+  await env.DB.prepare(`UPDATE ${entity} SET ${set} WHERE id=?`).bind(...vals,obj.id).run();
+  return obj.id;
  }
+
  const qs=cols.map(()=>"?").join(",");
  const r=await env.DB.prepare(`INSERT INTO ${entity} (${cols.join(",")}) VALUES (${qs})`).bind(...vals).run();
  return r.meta.last_row_id;
@@ -65,15 +94,28 @@ export default {
   if(p==="/api/session"){return (await isAdmin(req,env))?json({ok:true}):bad("Não autorizado",401)}
 
   if(p==="/api/site-data"){
-   const [s,a,l,c,f,ads]=await Promise.all([
-    env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
-    env.DB.prepare("SELECT * FROM articles WHERE status='publicado' ORDER BY featured DESC, published_at DESC, id DESC").all(),
-    env.DB.prepare("SELECT * FROM links WHERE active=1 ORDER BY id DESC").all(),
-    env.DB.prepare("SELECT * FROM cooperatives WHERE active=1 ORDER BY COALESCE(sort_order,100) ASC, name ASC").all(),
-    env.DB.prepare("SELECT * FROM faqs ORDER BY id").all(),
-    env.DB.prepare("SELECT * FROM ads WHERE active=1 ORDER BY id DESC").all()
-   ]);
-   return json({settings:s,articles:a.results,links:l.results,cooperatives:c.results,faqs:f.results,ads:ads.results});
+   try{
+    const coopPromise=getCooperatives(env,true);
+    const [s,a,l,c,f,ads]=await Promise.all([
+     env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
+     env.DB.prepare("SELECT * FROM articles WHERE status='publicado' ORDER BY featured DESC, published_at DESC, id DESC").all(),
+     env.DB.prepare("SELECT * FROM links WHERE active=1 ORDER BY id DESC").all(),
+     coopPromise,
+     env.DB.prepare("SELECT * FROM faqs ORDER BY id").all(),
+     env.DB.prepare("SELECT * FROM ads WHERE active=1 ORDER BY id DESC").all()
+    ]);
+    return json({
+     settings:s,
+     articles:a.results||[],
+     links:l.results||[],
+     cooperatives:c.results||[],
+     faqs:f.results||[],
+     ads:ads.results||[]
+    });
+   }catch(e){
+    console.error("site-data error",e);
+    return bad("Erro ao carregar dados públicos",500);
+   }
   }
 
   
@@ -99,7 +141,7 @@ if(p==="/api/track"&&req.method==="POST"){
     env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
     env.DB.prepare("SELECT * FROM articles ORDER BY id DESC").all(),
     env.DB.prepare("SELECT links.*,COALESCE((SELECT count FROM analytics WHERE event_type='link' AND item_id=links.id),0) clicks FROM links ORDER BY id DESC").all(),
-    env.DB.prepare("SELECT * FROM cooperatives ORDER BY COALESCE(sort_order,100) ASC, name ASC").all(),
+    getCooperatives(env,false),
     env.DB.prepare("SELECT * FROM faqs ORDER BY id DESC").all(),
     env.DB.prepare("SELECT ads.*,COALESCE((SELECT count FROM analytics WHERE event_type='ad' AND item_id=ads.id),0) clicks FROM ads ORDER BY id DESC").all(),
     env.DB.prepare("SELECT * FROM messages ORDER BY created_at DESC, id DESC").all(),
