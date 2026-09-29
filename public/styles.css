@@ -463,15 +463,73 @@ button,input,select,textarea{
    LINKS ÚTEIS
    ========================================================= */
 
+.link-tools{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:end;
+  width:100%;
+  margin:0 0 16px;
+  padding:14px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-top:4px solid #111;
+}
+
+.link-search-box{
+  position:relative;
+}
+
+.link-search-icon{
+  position:absolute;
+  left:11px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#677583;
+  font-size:18px;
+  pointer-events:none;
+}
+
+.link-search-box input{
+  width:100%;
+  height:44px;
+  padding:0 12px 0 38px;
+  border:1px solid #c8d2dc;
+  background:#fff;
+  color:#17212b;
+  border-radius:6px;
+  outline:0;
+  font-size:13px;
+}
+
+.link-search-box input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(10,79,138,.08);
+}
+
+.link-total{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:0 14px;
+  background:#101820;
+  color:#fff;
+  border-radius:6px;
+  font-size:10px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
 .links-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
+  gap:12px;
 }
 
 .link-card{
   display:block;
-  padding:12px;
+  padding:14px;
   background:#fbfcfd;
   border:1px solid var(--line);
   text-decoration:none;
@@ -486,24 +544,25 @@ button,input,select,textarea{
 
 .link-card b{
   display:block;
-  margin-bottom:4px;
-  font-size:13px;
+  margin-bottom:6px;
+  font-size:14px;
 }
 
 .link-card span{
   color:var(--muted);
-  font-size:10px;
-  line-height:1.45;
+  font-size:11px;
+  line-height:1.55;
 }
 
 .link-card em{
   display:block;
-  margin-top:7px;
+  margin-top:8px;
   color:var(--primary);
   font-style:normal;
   font-size:9px;
   font-weight:900;
 }
+
 
 /* =========================================================
    COOPERATIVAS
@@ -603,9 +662,6 @@ button,input,select,textarea{
 }
 
 .coop-card{
-  display:grid;
-  grid-template-columns:230px minmax(0,1fr);
-  min-height:300px;
   background:var(--paper);
   border:1px solid var(--line);
   overflow:hidden;
@@ -617,44 +673,57 @@ button,input,select,textarea{
   box-shadow:var(--shadow);
 }
 
+.coop-card-vertical{
+  display:flex;
+  flex-direction:column;
+}
+
 .coop-media{
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height:300px;
-  padding:20px;
   background:#fff;
-  border-right:1px solid var(--line);
+}
+
+.coop-media-top{
+  min-height:165px;
+  padding:20px 20px 10px;
+  border-bottom:1px solid var(--line);
 }
 
 .coop-media img{
   width:100%;
-  height:100%;
-  max-width:190px;
-  max-height:165px;
+  max-width:170px;
+  max-height:120px;
   object-fit:contain;
   object-position:center;
+  display:block;
 }
 
 .coop-placeholder{
-  width:100px;
-  height:100px;
+  width:90px;
+  height:90px;
   display:grid;
   place-items:center;
   border-radius:50%;
   background:#e9edf2;
   color:#183b63;
-  font:900 44px Georgia,"Times New Roman",serif;
+  font:900 40px Georgia,"Times New Roman",serif;
 }
 
 .coop-body{
   display:flex;
   flex-direction:column;
-  padding:20px 22px;
+  padding:16px 18px 18px;
+}
+
+.coop-body-centered{
+  align-items:stretch;
 }
 
 .coop-topline{
   margin-bottom:4px;
+  text-align:center;
 }
 
 .coop-topline .cat{
@@ -663,27 +732,58 @@ button,input,select,textarea{
 }
 
 .coop-body h3{
-  margin:5px 0 12px;
-  font:800 28px/1.12 Georgia,"Times New Roman",serif;
+  margin:6px 0 12px;
+  text-align:center;
+  font:800 24px/1.15 Georgia,"Times New Roman",serif;
 }
 
-/* descrição maior e justificada */
 .coop-description{
-  margin:0 0 18px;
-  color:#3f4d59;
-  font:16px/1.78 Georgia,"Times New Roman",serif;
+  margin:0;
+  color:#43515d;
+  font:14px/1.62 Georgia,"Times New Roman",serif;
   text-align:justify;
   text-justify:inter-word;
   hyphens:auto;
   overflow-wrap:anywhere;
 }
 
+.coop-description-clamp{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:10;
+  overflow:hidden;
+}
+
+.coop-description-expanded{
+  display:block;
+}
+
+.coop-readmore-wrap{
+  display:flex;
+  justify-content:center;
+  margin-top:10px;
+  margin-bottom:12px;
+}
+
+.coop-readmore{
+  border:0;
+  background:transparent;
+  color:var(--accent);
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  cursor:pointer;
+  padding:0;
+}
+
 .coop-actions{
   display:flex;
   flex-wrap:wrap;
+  justify-content:center;
   gap:9px;
   margin-top:auto;
-  padding-top:8px;
+  padding-top:6px;
 }
 
 .coop-actions .btn{
@@ -718,31 +818,17 @@ button,input,select,textarea{
   .coop-grid{
     grid-template-columns:1fr;
   }
-
-  .coop-card{
-    grid-template-columns:230px minmax(0,1fr);
-  }
 }
 
 @media(max-width:850px){
-  .coop-tools{
+  .coop-tools,
+  .link-tools{
     grid-template-columns:1fr;
   }
 
-  .coop-total{
+  .coop-total,
+  .link-total{
     justify-self:start;
-  }
-
-  .coop-card{
-    grid-template-columns:190px minmax(0,1fr);
-  }
-
-  .coop-media{
-    min-height:250px;
-  }
-
-  .coop-description{
-    font-size:15px;
   }
 }
 
@@ -751,35 +837,29 @@ button,input,select,textarea{
     font-size:29px;
   }
 
-  .coop-card{
+  .links-grid,
+  .coop-grid{
     grid-template-columns:1fr;
   }
 
-  .coop-media{
-    min-height:190px;
-    border-right:0;
-    border-bottom:1px solid var(--line);
-  }
-
-  .coop-media img{
-    max-width:180px;
-    max-height:125px;
+  .coop-media-top{
+    min-height:145px;
   }
 
   .coop-body{
-    padding:17px;
+    padding:15px;
   }
 
   .coop-body h3{
-    font-size:25px;
+    font-size:22px;
   }
 
   .coop-description{
-    font-size:15px;
-    line-height:1.72;
-    text-align:left;
+    font-size:14px;
+    line-height:1.62;
   }
 }
+
 
 /* =========================================================
    BOTÕES
