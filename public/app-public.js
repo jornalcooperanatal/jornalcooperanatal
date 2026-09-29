@@ -237,6 +237,11 @@ function cooperativeSearchBlob(c){
 }
 
 
+function coopBrandColor(value){
+  const v=String(value||"").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v : "#dfe8f1";
+}
+
 function renderCooperatives(){
   const grid = $("coopGrid");
   if(!grid) return;
@@ -282,7 +287,7 @@ function renderCooperatives(){
   }
 
   grid.innerHTML = list.map(c => `
-    <article class="coop-card coop-card-vertical">
+    <article class="coop-card coop-card-vertical" style="--coop-brand:${coopBrandColor(c.brand_color)}">
 
       <div class="coop-media coop-media-top">
         ${
