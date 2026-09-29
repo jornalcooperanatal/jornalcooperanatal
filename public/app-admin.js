@@ -12,28 +12,115 @@ async function upload(input){
  if(!f)return null;
  if(!f.type.startsWith("image/"))throw new Error("Selecione um arquivo de imagem.");
  if(f.size>12*1024*1024)throw new Error("Use uma imagem de até 12 MB.");
+
  const bitmap=await createImageBitmap(f);
  const maxSide=1500;
  let w=bitmap.width,h=bitmap.height;
+
  if(w>maxSide||h>maxSide){
    const scale=Math.min(maxSide/w,maxSide/h);
    w=Math.max(1,Math.round(w*scale));
    h=Math.max(1,Math.round(h*scale));
  }
+
  const canvas=document.createElement("canvas");
- canvas.width=w;canvas.height=h;
- const ctx=canvas.getContext("2d",{alpha:false});
- ctx.fillStyle="#ffffff";
- ctx.fillRect(0,0,w,h);
+ canvas.width=w;
+ canvas.height=h;
+
+ const ctx=canvas.getContext("2d",{alpha:true});
+ ctx.clearRect(0,0,w,h);
  ctx.drawImage(bitmap,0,0,w,h);
+
  if(bitmap.close)bitmap.close();
+
  let quality=.82;
  let data=canvas.toDataURL("image/webp",quality);
+
  while(data.length>900000 && quality>.48){
    quality-=.08;
    data=canvas.toDataURL("image/webp",quality);
  }
- if(data.length>1100000)throw new Error("A imagem ficou muito grande mesmo após compressão. Escolha uma foto menor.");
+
+ if(data.length>1100000){
+   throw new Error("A imagem ficou muito grande mesmo após compressão. Escolha uma foto menor.");
+ }
+
+ return data;
+}
+
+async function uploadCoopLogo(input,removeWhite=true){
+ const f=input.files[0];
+ if(!f)return null;
+
+ if(!f.type.startsWith("image/")){
+   throw new Error("Selecione um arquivo de imagem.");
+ }
+
+ if(f.size>12*1024*1024){
+   throw new Error("Use uma imagem de até 12 MB.");
+ }
+
+ const bitmap=await createImageBitmap(f);
+ const maxSide=1200;
+
+ let w=bitmap.width;
+ let h=bitmap.height;
+
+ if(w>maxSide||h>maxSide){
+   const scale=Math.min(maxSide/w,maxSide/h);
+   w=Math.max(1,Math.round(w*scale));
+   h=Math.max(1,Math.round(h*scale));
+ }
+
+ const canvas=document.createElement("canvas");
+ canvas.width=w;
+ canvas.height=h;
+
+ const ctx=canvas.getContext("2d",{alpha:true});
+ ctx.clearRect(0,0,w,h);
+ ctx.drawImage(bitmap,0,0,w,h);
+
+ if(bitmap.close)bitmap.close();
+
+ if(removeWhite){
+   const img=ctx.getImageData(0,0,w,h);
+   const d=img.data;
+
+   for(let i=0;i<d.length;i+=4){
+     const r=d[i];
+     const g=d[i+1];
+     const b=d[i+2];
+     const a=d[i+3];
+
+     if(a===0)continue;
+
+     const max=Math.max(r,g,b);
+     const min=Math.min(r,g,b);
+     const neutral=(max-min)<18;
+
+     if(neutral && r>244 && g>244 && b>244){
+       d[i+3]=0;
+     }else if(neutral && r>225 && g>225 && b>225){
+       const fade=(245-r)/20;
+       d[i+3]=Math.max(0,Math.min(255,Math.round(a*fade)));
+     }
+   }
+
+   ctx.putImageData(img,0,0);
+ }
+
+ let quality=.9;
+ let data=canvas.toDataURL("image/webp",quality);
+
+ while(data.length>800000 && quality>.55){
+   quality-=.07;
+   data=canvas.toDataURL("image/webp",quality);
+ }
+
+ if(data.length>1000000){
+   throw new Error("A logo ficou muito grande. Escolha uma imagem menor.");
+ }
+
  return data;
 }
 async function loadAll(){DATA=await api("/api/admin-data");renderAll()}
@@ -48,9 +135,39 @@ $("clearArticle").onclick=()=>{$("articleForm").reset();$("artId").value="";$("a
 $("articleForm").onsubmit=async e=>{e.preventDefault();let image=$("artImage").value;if($("artUpload").files[0])image=await upload($("artUpload"));const obj={id:$("artId").value||null,title:$("artTitle").value,summary:$("artSummary").value,category:$("artCategory").value,author:$("artAuthor").value,published_at:$("artDate").value,status:$("artStatus").value,featured:+$("artFeatured").value,content_type:$("artType").value,image_url:image,body_html:$("artContent").value,youtube_url:$("artYoutube").value,extra_label:$("artExtraLabel").value,extra_url:$("artExtraUrl").value,source_name:$("artSourceName").value,source_url:$("artSourceUrl").value};await saveEntity("articles",obj);$("clearArticle").click();await loadAll()};
 
 function renderCoops(){$("coopRows").innerHTML=(DATA.cooperatives||[]).map(x=>`<tr><td><b>${Number(x.sort_order||100)}</b></td><td>${esc(x.name)}</td><td>${esc(x.type||"")}</td><td>${esc(x.website||"")}</td><td><button class="btn light" onclick="editCoop(${x.id})">Editar</button> <button class="btn" onclick="delRow('cooperatives',${x.id})">Excluir</button></td></tr>`).join("")}
-window.editCoop=id=>{const x=DATA.cooperatives.find(a=>a.id===id);$("coopId").value=x.id;$("coopName").value=x.name||"";$("coopType").value=x.type||"";$("coopOrder").value=Number(x.sort_order||100);$("coopColor").value=x.brand_color||"#0b4f84";$("coopColorText").value=x.brand_color||"#0b4f84";$("coopDesc").value=x.description||"";$("coopWebsite").value=x.website||"";$("coopInstagram").value=x.instagram||"";$("coopImage").value=x.image_url||"";$("coopActive").value=x.active?1:0};
-$("clearCoop").onclick=()=>{$("coopForm").reset();$("coopId").value="";$("coopOrder").value=100;$("coopColor").value="#0b4f84";$("coopColorText").value="#0b4f84"};
-$("coopForm").onsubmit=async e=>{e.preventDefault();let image=$("coopImage").value;if($("coopUpload").files[0])image=await upload($("coopUpload"));await saveEntity("cooperatives",{id:$("coopId").value||null,name:$("coopName").value,type:$("coopType").value,sort_order:+$("coopOrder").value||100,brand_color:$("coopColorText").value||$("coopColor").value||"#0b4f84",description:$("coopDesc").value,website:$("coopWebsite").value,instagram:$("coopInstagram").value,image_url:image,active:+$("coopActive").value});$("clearCoop").click();await loadAll()};
+window.editCoop=id=>{const x=DATA.cooperatives.find(a=>a.id===id);$("coopId").value=x.id;$("coopName").value=x.name||"";$("coopType").value=x.type||"";$("coopOrder").value=Number(x.sort_order||100);$("coopColor").value=x.brand_color||"#0b4f84";$("coopColorText").value=x.brand_color||"#0b4f84";$("coopDesc").value=x.description||"";$("coopWebsite").value=x.website||"";$("coopInstagram").value=x.instagram||"";$("coopImage").value=x.image_url||"";$("coopActive").value=x.active?1:0;if($("coopRemoveWhite"))$("coopRemoveWhite").checked=true};
+$("clearCoop").onclick=()=>{$("coopForm").reset();$("coopId").value="";$("coopOrder").value=100;$("coopColor").value="#0b4f84";$("coopColorText").value="#0b4f84";if($("coopRemoveWhite"))$("coopRemoveWhite").checked=true};
+$("coopForm").onsubmit=async e=>{
+ e.preventDefault();
+
+ let image=$("coopImage").value;
+
+ if($("coopUpload").files[0]){
+   image=await uploadCoopLogo(
+     $("coopUpload"),
+     $("coopRemoveWhite")?.checked!==false
+   );
+ }
+
+ const colorRaw=($("coopColorText").value||$("coopColor").value||"#0b4f84").trim();
+ const brandColor=/^#[0-9a-fA-F]{6}$/.test(colorRaw)?colorRaw:"#0b4f84";
+
+ await saveEntity("cooperatives",{
+   id:$("coopId").value||null,
+   name:$("coopName").value,
+   type:$("coopType").value,
+   sort_order:+$("coopOrder").value||100,
+   brand_color:brandColor,
+   description:$("coopDesc").value,
+   website:$("coopWebsite").value,
+   instagram:$("coopInstagram").value,
+   image_url:image,
+   active:+$("coopActive").value
+ });
+
+ $("clearCoop").click();
+ await loadAll();
+};
 
 function renderLinks(){$("linkRows").innerHTML=(DATA.links||[]).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.category||"")}</td><td>${x.clicks||0}</td><td><button class="btn light" onclick="editLink(${x.id})">Editar</button> <button class="btn" onclick="delRow('links',${x.id})">Excluir</button></td></tr>`).join("")}
 window.editLink=id=>{const x=DATA.links.find(a=>a.id===id);$("linkId").value=x.id;$("linkName").value=x.name||"";$("linkCategory").value=x.category||"";$("linkDesc").value=x.description||"";$("linkUrl").value=x.url||"";$("linkActive").value=x.active?1:0};
