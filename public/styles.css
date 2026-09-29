@@ -1663,3 +1663,73 @@ details p{
   .sim-result-card{min-height:auto}
   .sim-intro>div:first-child{padding:16px}
 }
+
+
+/* =========================================================
+   ABAS PRINCIPAIS — UMA ÁREA POR VEZ
+   ========================================================= */
+.portal-tab{
+  display:none;
+  width:100%;
+  min-height:calc(100vh - 190px);
+  padding:8px 0 28px;
+}
+.portal-tab.active{
+  display:block;
+}
+.nav .nav-tab{
+  flex:1 1 auto;
+  text-align:center;
+  border-bottom:3px solid transparent;
+}
+.nav .nav-tab.active{
+  background:#111;
+  color:#fff;
+  border-bottom-color:var(--accent);
+}
+#capa.portal-tab{
+  padding-top:0;
+}
+#comparador,
+#noticias,
+#entrevistas,
+#cooperativas,
+#links,
+#faq,
+#contato{
+  min-height:calc(100vh - 175px);
+}
+#links .box,
+#faq .faq-box,
+#contato .contact-layout{
+  width:100%;
+}
+#links .links-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+#faq .faq-box{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 22px;
+}
+#faq details{
+  min-height:76px;
+}
+.sim-grid-5{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+@media(max-width:1350px){
+  .sim-grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #links .links-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:1000px){
+  .portal-tab{min-height:auto}
+  .sim-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #links .links-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #faq .faq-box{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .nav .nav-tab{flex:1 1 50%}
+  .sim-grid-5,
+  #links .links-grid{grid-template-columns:1fr}
+}
