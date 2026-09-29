@@ -682,22 +682,32 @@ button,input,select,textarea{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#fff;
 }
 
 .coop-media-top{
-  min-height:165px;
-  padding:20px 20px 10px;
+  min-height:180px;
+  padding:24px 22px 18px;
   border-bottom:1px solid var(--line);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--coop-brand) 86%, white) 0%,
+      var(--coop-brand) 48%,
+      color-mix(in srgb, var(--coop-brand) 72%, black) 100%
+    );
 }
 
 .coop-media img{
   width:100%;
-  max-width:170px;
-  max-height:120px;
+  max-width:190px;
+  max-height:130px;
   object-fit:contain;
   object-position:center;
   display:block;
+  background:transparent;
+  border:0;
+  padding:0;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));
 }
 
 .coop-placeholder{
