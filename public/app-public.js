@@ -141,22 +141,375 @@ function renderBreakingTicker(articles,settingsText){
  host.innerHTML=`<div class="breaking-viewport"><div class="breaking-track">${items.map((x,i)=>`<span class="breaking-item ${x.id?'is-link':''}" ${x.id?`onclick="openArticle(${x.id})"`:''}><strong>${esc(x.label)}</strong>${x.time?` <em>• ${esc(x.time)}</em>`:""}</span>`).join('<span class="breaking-sep">◆</span>')}</div></div>`;
 }
 
-function render(){
- const s=DATA.settings||{};
- document.documentElement.style.setProperty("--primary",s.primary_color||"#0a4f8a");
- document.documentElement.style.setProperty("--accent",s.accent_color||"#a61f2b");
- $("brand").textContent=s.site_name||"Jornal Coopera Natal";$("footerBrand").textContent=s.site_name||"Jornal Coopera Natal";$("tagline").textContent=s.tagline||"";$("footerAbout").textContent=s.about_text||"";
- const arts=DATA.articles||[];
- renderBreakingTicker(arts,s.breaking_text||"");
- setupHeroCarousel(arts);
- const side=arts.slice(1,3);$("heroSide").innerHTML=side.map(a=>`<article class="side-story" onclick="openArticle(${a.id})">${a.image_url?`<img src="${esc(a.image_url)}" alt="">`:""}<div><div class="cat">${esc(a.category)}</div><h3>${esc(a.title)}</h3><p>${esc(a.summary)}</p></div></article>`).join("");
- $("newsGrid").innerHTML=arts.filter(a=>a.content_type!=="entrevista").slice(0,12).map(articleCard).join("");
- $("interviewGrid").innerHTML=arts.filter(a=>a.content_type==="entrevista"||a.category==="Entrevistas").slice(0,9).map(articleCard).join("")||"<p>Nenhuma entrevista publicada ainda.</p>";
- renderCooperatives();
- $("linkGrid").innerHTML=(DATA.links||[]).map(x=>`<a class="link-card" target="_blank" rel="noopener" href="${esc(x.url)}" onclick="track('link',${x.id})"><b>${esc(x.name)}</b><span>${esc(x.description||"")}</span><em>${esc(x.category||"Serviço")} →</em></a>`).join("");
- $("faqList").innerHTML=(DATA.faqs||[]).map((f,i)=>`<details ${i===0?"open":""}><summary>${esc(f.question)}</summary><p>${esc(f.answer)}</p></details>`).join("");
- renderAds();
+
+/* =========================================================
+   COOPERATIVAS — BUSCA, RAMO, ORDEM E LOGO
+   ========================================================= */
+
+let COOP_FILTER_TEXT = "";
+let COOP_FILTER_TYPE = "Todos";
+
+function normalizeSearchText(value){
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
+
+function ensureCoopControls(){
+  const grid = $("coopGrid");
+  if(!grid || $("coopTools")) return;
+
+  const tools = document.createElement("div");
+  tools.id = "coopTools";
+  tools.className = "coop-tools";
+
+  tools.innerHTML = `
+    <div class="coop-search-box">
+      <span class="coop-search-icon">⌕</span>
+      <input
+        id="coopSearch"
+        type="search"
+        placeholder="Pesquisar por nome, ramo ou palavra-chave..."
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="coop-filter-wrap">
+      <label for="coopTypeFilter">Ramo</label>
+      <select id="coopTypeFilter">
+        <option value="Todos">Todos os ramos</option>
+      </select>
+    </div>
+
+    <div class="coop-total" id="coopTotal"></div>
+  `;
+
+  grid.parentNode.insertBefore(tools, grid);
+
+  $("coopSearch").addEventListener("input", e => {
+    COOP_FILTER_TEXT = e.target.value || "";
+    renderCooperatives();
+  });
+
+  $("coopTypeFilter").addEventListener("change", e => {
+    COOP_FILTER_TYPE = e.target.value || "Todos";
+    renderCooperatives();
+  });
+}
+
+function updateCoopTypeOptions(){
+  const select = $("coopTypeFilter");
+  if(!select) return;
+
+  const types = [...new Set(
+    (DATA.cooperatives || [])
+      .map(c => String(c.type || "Outros").trim())
+      .filter(Boolean)
+  )].sort((a,b) => a.localeCompare(b, "pt-BR"));
+
+  const current = COOP_FILTER_TYPE;
+
+  select.innerHTML = `
+    <option value="Todos">Todos os ramos</option>
+    ${types.map(type => `
+      <option value="${esc(type)}">${esc(type)}</option>
+    `).join("")}
+  `;
+
+  if(types.includes(current)){
+    select.value = current;
+  }else{
+    COOP_FILTER_TYPE = "Todos";
+    select.value = "Todos";
+  }
+}
+
+function cooperativeSearchBlob(c){
+  return normalizeSearchText([
+    c.name,
+    c.type,
+    c.description,
+    c.website,
+    c.instagram
+  ].filter(Boolean).join(" "));
+}
+
+function renderCooperatives(){
+  const grid = $("coopGrid");
+  if(!grid) return;
+
+  ensureCoopControls();
+  updateCoopTypeOptions();
+
+  const search = normalizeSearchText(COOP_FILTER_TEXT);
+
+  const all = [...(DATA.cooperatives || [])].sort((a,b) => {
+    const ao = Number.isFinite(Number(a.sort_order))
+      ? Number(a.sort_order)
+      : 100;
+
+    const bo = Number.isFinite(Number(b.sort_order))
+      ? Number(b.sort_order)
+      : 100;
+
+    if(ao !== bo) return ao - bo;
+
+    return String(a.name || "")
+      .localeCompare(String(b.name || ""), "pt-BR");
+  });
+
+  const list = all.filter(c => {
+    const matchesType =
+      COOP_FILTER_TYPE === "Todos" ||
+      String(c.type || "Outros") === COOP_FILTER_TYPE;
+
+    const matchesText =
+      !search ||
+      cooperativeSearchBlob(c).includes(search);
+
+    return matchesType && matchesText;
+  });
+
+  if($("coopTotal")){
+    $("coopTotal").textContent =
+      list.length === all.length
+        ? `${all.length} cooperativa${all.length === 1 ? "" : "s"}`
+        : `${list.length} de ${all.length}`;
+  }
+
+  if(!list.length){
+    grid.innerHTML = `
+      <div class="coop-empty">
+        <b>Nenhuma cooperativa encontrada.</b>
+        <span>Tente pesquisar outro nome, ramo ou palavra-chave.</span>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = list.map(c => `
+    <article class="coop-card">
+
+      <div class="coop-media">
+        ${
+          c.image_url
+            ? `
+              <img
+                src="${esc(c.image_url)}"
+                alt="Logo ${esc(c.name || "Cooperativa")}"
+                loading="lazy"
+              >
+            `
+            : `
+              <div class="coop-placeholder">
+                ${esc((c.name || "C").charAt(0).toUpperCase())}
+              </div>
+            `
+        }
+      </div>
+
+      <div class="coop-body">
+        <div class="coop-topline">
+          <span class="cat">
+            ${esc(c.type || "Cooperativa")}
+          </span>
+        </div>
+
+        <h3>${esc(c.name || "")}</h3>
+
+        <p class="coop-description">
+          ${esc(c.description || "")}
+        </p>
+
+        <div class="coop-actions">
+          ${
+            c.website
+              ? `
+                <a
+                  class="btn primary"
+                  target="_blank"
+                  rel="noopener"
+                  href="${esc(c.website)}"
+                  onclick="track('coop', ${Number(c.id) || 0})"
+                >
+                  Site
+                </a>
+              `
+              : ""
+          }
+
+          ${
+            c.instagram
+              ? `
+                <a
+                  class="btn light"
+                  target="_blank"
+                  rel="noopener"
+                  href="${esc(c.instagram)}"
+                  onclick="track('coop', ${Number(c.id) || 0})"
+                >
+                  Instagram
+                </a>
+              `
+              : ""
+          }
+        </div>
+      </div>
+
+    </article>
+  `).join("");
+}
+
+
+function render(){
+  const s = DATA.settings || {};
+
+  document.documentElement.style.setProperty(
+    "--primary",
+    s.primary_color || "#0a4f8a"
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent",
+    s.accent_color || "#a61f2b"
+  );
+
+  if($("brand")){
+    $("brand").textContent = s.site_name || "Jornal Coopera Natal";
+  }
+
+  if($("footerBrand")){
+    $("footerBrand").textContent = s.site_name || "Jornal Coopera Natal";
+  }
+
+  if($("tagline")){
+    $("tagline").textContent = s.tagline || "";
+  }
+
+  if($("footerAbout")){
+    $("footerAbout").textContent = s.about_text || "";
+  }
+
+  const arts = DATA.articles || [];
+
+  renderBreakingTicker(
+    arts,
+    s.breaking_text || ""
+  );
+
+  if($("heroMain") && arts.length){
+    setupHeroCarousel(arts);
+  }
+
+  const side = arts.slice(1,3);
+
+  if($("heroSide")){
+    $("heroSide").innerHTML = side.map(a => `
+      <article class="side-story" onclick="openArticle(${Number(a.id) || 0})">
+        ${
+          a.image_url
+            ? `<img src="${esc(a.image_url)}" alt="">`
+            : ""
+        }
+
+        <div>
+          <div class="cat">${esc(a.category || "")}</div>
+          <h3>${esc(a.title || "")}</h3>
+          <p>${esc(a.summary || "")}</p>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  if($("newsGrid")){
+    const news = arts
+      .filter(a => a.content_type !== "entrevista")
+      .slice(0,12);
+
+    $("newsGrid").innerHTML =
+      news.length
+        ? news.map(articleCard).join("")
+        : `<div class="empty-state">Nenhuma notícia publicada ainda.</div>`;
+  }
+
+  if($("interviewGrid")){
+    const interviews = arts
+      .filter(a =>
+        a.content_type === "entrevista" ||
+        a.category === "Entrevistas"
+      )
+      .slice(0,9);
+
+    $("interviewGrid").innerHTML =
+      interviews.length
+        ? interviews.map(articleCard).join("")
+        : `<div class="empty-state">Nenhuma entrevista publicada ainda.</div>`;
+  }
+
+  /* COOPERATIVAS */
+  renderCooperatives();
+
+  /* LINKS ÚTEIS */
+  if($("linkGrid")){
+    const links = DATA.links || [];
+
+    $("linkGrid").innerHTML =
+      links.length
+        ? links.map(x => `
+            <a
+              class="link-card"
+              target="_blank"
+              rel="noopener"
+              href="${esc(x.url || "#")}"
+              onclick="track('link', ${Number(x.id) || 0})"
+            >
+              <b>${esc(x.name || "")}</b>
+
+              <span>
+                ${esc(x.description || "")}
+              </span>
+
+              <em>
+                ${esc(x.category || "Serviço")} →
+              </em>
+            </a>
+          `).join("")
+        : `
+          <div class="empty-state">
+            Nenhum link útil cadastrado como ativo.
+          </div>
+        `;
+  }
+
+  /* DÚVIDAS */
+  if($("faqList")){
+    const faqs = DATA.faqs || [];
+
+    $("faqList").innerHTML =
+      faqs.length
+        ? faqs.map((f,i) => `
+            <details ${i === 0 ? "open" : ""}>
+              <summary>
+                ${esc(f.question || "")}
+              </summary>
+
+              <p>
+                ${esc(f.answer || "")}
+              </p>
+            </details>
+          `).join("")
+        : `
+          <div class="empty-state">
+            Nenhuma dúvida cadastrada ainda.
+          </div>
+        `;
+  }
+
+  renderAds();
+}
+
 function renderAds(){
  ["top","middle"].forEach(place=>{
   const host=$(place==="top"?"adTop":"adMiddle"); const ad=(DATA.ads||[]).find(a=>a.placement===place);
@@ -167,6 +520,7 @@ function renderAds(){
  });
 }
 async function openArticle(id){
+ if(typeof activatePortalTab==="function") activatePortalTab("noticias");
  await track("article",id);
  const a=(DATA.articles||[]).find(x=>x.id===id); if(!a)return;
  const yid=youtubeId(a.youtube_url);
