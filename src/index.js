@@ -16,7 +16,7 @@ function sqlEntity(entity){
  const map={
   articles:["title","summary","category","author","published_at","status","featured","content_type","image_url","body_html","youtube_url","extra_label","extra_url","source_name","source_url"],
   links:["name","category","description","url","active"],
-  cooperatives:["name","type","description","website","instagram","image_url","active"],
+  cooperatives:["name","type","sort_order","description","website","instagram","image_url","active"],
   faqs:["question","answer"],
   ads:["name","title","body","placement","target_url","image_url","active"]
  };return map[entity]
@@ -69,7 +69,7 @@ export default {
     env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
     env.DB.prepare("SELECT * FROM articles WHERE status='publicado' ORDER BY featured DESC, published_at DESC, id DESC").all(),
     env.DB.prepare("SELECT * FROM links WHERE active=1 ORDER BY id DESC").all(),
-    env.DB.prepare("SELECT * FROM cooperatives WHERE active=1 ORDER BY name").all(),
+    env.DB.prepare("SELECT * FROM cooperatives WHERE active=1 ORDER BY COALESCE(sort_order,100) ASC, name ASC").all(),
     env.DB.prepare("SELECT * FROM faqs ORDER BY id").all(),
     env.DB.prepare("SELECT * FROM ads WHERE active=1 ORDER BY id DESC").all()
    ]);
@@ -99,7 +99,7 @@ if(p==="/api/track"&&req.method==="POST"){
     env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
     env.DB.prepare("SELECT * FROM articles ORDER BY id DESC").all(),
     env.DB.prepare("SELECT links.*,COALESCE((SELECT count FROM analytics WHERE event_type='link' AND item_id=links.id),0) clicks FROM links ORDER BY id DESC").all(),
-    env.DB.prepare("SELECT * FROM cooperatives ORDER BY id DESC").all(),
+    env.DB.prepare("SELECT * FROM cooperatives ORDER BY COALESCE(sort_order,100) ASC, name ASC").all(),
     env.DB.prepare("SELECT * FROM faqs ORDER BY id DESC").all(),
     env.DB.prepare("SELECT ads.*,COALESCE((SELECT count FROM analytics WHERE event_type='ad' AND item_id=ads.id),0) clicks FROM ads ORDER BY id DESC").all(),
     env.DB.prepare("SELECT * FROM messages ORDER BY created_at DESC, id DESC").all(),
