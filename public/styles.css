@@ -689,10 +689,9 @@ button,input,select,textarea{
   padding:24px 22px 18px;
   border-bottom:1px solid var(--line);
   background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--coop-brand) 86%, white) 0%,
-      var(--coop-brand) 48%,
+    radial-gradient(circle at 50% 42%,
+      color-mix(in srgb, var(--coop-brand) 76%, white) 0%,
+      var(--coop-brand) 56%,
       color-mix(in srgb, var(--coop-brand) 72%, black) 100%
     );
 }
@@ -707,7 +706,7 @@ button,input,select,textarea{
   background:transparent;
   border:0;
   padding:0;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.20));
 }
 
 .coop-placeholder{
