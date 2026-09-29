@@ -61,7 +61,7 @@ async function uploadCoopLogo(input,removeWhite=true){
  }
 
  const bitmap=await createImageBitmap(f);
- const maxSide=1200;
+ const maxSide=1400;
 
  let w=bitmap.width;
  let h=bitmap.height;
@@ -72,11 +72,11 @@ async function uploadCoopLogo(input,removeWhite=true){
    h=Math.max(1,Math.round(h*scale));
  }
 
- const canvas=document.createElement("canvas");
+ let canvas=document.createElement("canvas");
  canvas.width=w;
  canvas.height=h;
 
- const ctx=canvas.getContext("2d",{alpha:true});
+ let ctx=canvas.getContext("2d",{alpha:true});
  ctx.clearRect(0,0,w,h);
  ctx.drawImage(bitmap,0,0,w,h);
 
@@ -85,35 +85,116 @@ async function uploadCoopLogo(input,removeWhite=true){
  if(removeWhite){
    const img=ctx.getImageData(0,0,w,h);
    const d=img.data;
+   const total=w*h;
 
-   for(let i=0;i<d.length;i+=4){
-     const r=d[i];
-     const g=d[i+1];
-     const b=d[i+2];
-     const a=d[i+3];
+   const visited=new Uint8Array(total);
+   const queue=new Int32Array(total);
+   let head=0,tail=0;
 
-     if(a===0)continue;
+   const isBackground=(idx)=>{
+     const p=idx*4;
+     const r=d[p],g=d[p+1],b=d[p+2],a=d[p+3];
+
+     if(a===0)return true;
 
      const max=Math.max(r,g,b);
      const min=Math.min(r,g,b);
-     const neutral=(max-min)<18;
+     const spread=max-min;
+     const avg=(r+g+b)/3;
 
-     if(neutral && r>244 && g>244 && b>244){
-       d[i+3]=0;
-     }else if(neutral && r>225 && g>225 && b>225){
-       const fade=(245-r)/20;
-       d[i+3]=Math.max(0,Math.min(255,Math.round(a*fade)));
+     // Aceita branco, cinza-claro e pequenas variações de JPEG,
+     // mas somente quando conectadas às bordas.
+     return avg>=205 && spread<=55;
+   };
+
+   const push=(idx)=>{
+     if(idx<0||idx>=total||visited[idx])return;
+     if(!isBackground(idx))return;
+     visited[idx]=1;
+     queue[tail++]=idx;
+   };
+
+   // inicia pelas quatro bordas
+   for(let x=0;x<w;x++){
+     push(x);
+     push((h-1)*w+x);
+   }
+   for(let y=0;y<h;y++){
+     push(y*w);
+     push(y*w+(w-1));
+   }
+
+   while(head<tail){
+     const idx=queue[head++];
+     const x=idx%w;
+     const y=(idx/w)|0;
+
+     const p=idx*4;
+     const r=d[p],g=d[p+1],b=d[p+2];
+     const avg=(r+g+b)/3;
+
+     // transparência progressiva para manter antialias suave
+     if(avg>=245){
+       d[p+3]=0;
+     }else{
+       const alpha=Math.max(0,Math.min(255,Math.round((245-avg)/40*255)));
+       d[p+3]=Math.min(d[p+3],alpha);
      }
+
+     if(x>0)push(idx-1);
+     if(x<w-1)push(idx+1);
+     if(y>0)push(idx-w);
+     if(y<h-1)push(idx+w);
    }
 
    ctx.putImageData(img,0,0);
+
+   // recorta margens transparentes automaticamente
+   const cleaned=ctx.getImageData(0,0,w,h).data;
+   let minX=w,minY=h,maxX=-1,maxY=-1;
+
+   for(let y=0;y<h;y++){
+     for(let x=0;x<w;x++){
+       const a=cleaned[(y*w+x)*4+3];
+       if(a>8){
+         if(x<minX)minX=x;
+         if(x>maxX)maxX=x;
+         if(y<minY)minY=y;
+         if(y>maxY)maxY=y;
+       }
+     }
+   }
+
+   if(maxX>=minX && maxY>=minY){
+     const pad=Math.max(6,Math.round(Math.max(w,h)*0.025));
+     minX=Math.max(0,minX-pad);
+     minY=Math.max(0,minY-pad);
+     maxX=Math.min(w-1,maxX+pad);
+     maxY=Math.min(h-1,maxY+pad);
+
+     const cw=maxX-minX+1;
+     const ch=maxY-minY+1;
+
+     const cropped=document.createElement("canvas");
+     cropped.width=cw;
+     cropped.height=ch;
+
+     const cctx=cropped.getContext("2d",{alpha:true});
+     cctx.clearRect(0,0,cw,ch);
+     cctx.drawImage(canvas,minX,minY,cw,ch,0,0,cw,ch);
+
+     canvas=cropped;
+     ctx=cctx;
+     w=cw;
+     h=ch;
+   }
  }
 
- let quality=.9;
+ let quality=.92;
  let data=canvas.toDataURL("image/webp",quality);
 
- while(data.length>800000 && quality>.55){
-   quality-=.07;
+ while(data.length>800000 && quality>.56){
+   quality-=.06;
    data=canvas.toDataURL("image/webp",quality);
  }
 
