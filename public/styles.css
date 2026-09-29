@@ -678,36 +678,36 @@ button,input,select,textarea{
   flex-direction:column;
 }
 
+
 .coop-media{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:block;
+  width:100%;
+  background:transparent;
 }
 
 .coop-media-top{
-  min-height:180px;
-  isolation:isolate;
-  padding:24px 22px 18px;
+  width:100%;
+  min-height:0;
+  padding:0;
   border-bottom:1px solid var(--line);
-  background:
-    radial-gradient(circle at 50% 42%,
-      color-mix(in srgb, var(--coop-brand) 76%, white) 0%,
-      var(--coop-brand) 56%,
-      color-mix(in srgb, var(--coop-brand) 72%, black) 100%
-    );
+  background:transparent !important;
+  overflow:hidden;
 }
 
-.coop-media img{
+.coop-media-top img{
+  display:block;
   width:100%;
-  max-width:230px;
-  max-height:145px;
+  height:auto;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:0;
   object-fit:contain;
   object-position:center;
-  display:block;
   background:transparent;
   border:0;
-  padding:0;
-  filter:drop-shadow(0 5px 8px rgba(0,0,0,.20));
+  box-shadow:none;
+  filter:none;
 }
 
 .coop-placeholder{
@@ -852,9 +852,6 @@ button,input,select,textarea{
     grid-template-columns:1fr;
   }
 
-  .coop-media-top{
-    min-height:145px;
-  }
 
   .coop-body{
     padding:15px;
