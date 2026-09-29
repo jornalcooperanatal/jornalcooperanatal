@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS cooperatives(
  id INTEGER PRIMARY KEY AUTOINCREMENT,
  name TEXT NOT NULL,
  type TEXT,
+ sort_order INTEGER NOT NULL DEFAULT 100,
  description TEXT,
  website TEXT,
  instagram TEXT,
