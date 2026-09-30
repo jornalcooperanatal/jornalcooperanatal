@@ -463,6 +463,88 @@ function renderLinks(){
       `;
 }
 
+
+function homeMiniArticle(a){
+  if(!a)return "";
+  return `
+    <article class="home-mini-item" onclick="openArticle(${Number(a.id)||0})">
+      ${a.image_url ? `<img src="${esc(a.image_url)}" alt="">` : `<div></div>`}
+      <div>
+        <div class="cat">${esc(a.category||"Notícia")}</div>
+        <h3>${esc(a.title||"")}</h3>
+        <small>${a.views ? `${Number(a.views).toLocaleString("pt-BR")} leitura${Number(a.views)===1?"":"s"}` : relativePublishedTime(a.published_at)}</small>
+      </div>
+    </article>
+  `;
+}
+
+function homeBottomArticle(a){
+  if(!a)return "";
+  return `
+    <article class="home-bottom-card" onclick="openArticle(${Number(a.id)||0})">
+      ${a.image_url ? `<img src="${esc(a.image_url)}" alt="">` : `<div></div>`}
+      <div class="home-bottom-card-copy">
+        <div class="cat">${esc(a.category||"Notícia")}</div>
+        <h3>${esc(a.title||"")}</h3>
+        <p>${esc(a.summary||"")}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderHomeDashboard(arts){
+  const list=arts||[];
+
+  if($("homeLatest")){
+    const latest=list.slice(1,4);
+    $("homeLatest").innerHTML=latest.length
+      ? latest.map(homeMiniArticle).join("")
+      : `<div class="home-empty">Cadastre mais notícias para preencher este espaço.</div>`;
+  }
+
+  if($("homePopular")){
+    const popular=[...list]
+      .sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0))
+      .filter((a,i,arr)=>a && i<3);
+
+    $("homePopular").innerHTML=popular.length
+      ? popular.map(homeMiniArticle).join("")
+      : `<div class="home-empty">As matérias mais lidas aparecerão aqui.</div>`;
+  }
+
+  if($("homeCoopHighlight")){
+    const coops=[...(DATA.cooperatives||[])].sort((a,b)=>{
+      const ao=Number(a.sort_order||100);
+      const bo=Number(b.sort_order||100);
+      return ao-bo || String(a.name||"").localeCompare(String(b.name||""),"pt-BR");
+    });
+    const c=coops[0];
+
+    $("homeCoopHighlight").innerHTML=c ? `
+      <div class="home-coop-highlight"
+           style="--coop-color:${coopBrandColor(c.brand_color)}"
+           onclick="activatePortalTab('cooperativas')">
+        <div class="home-coop-highlight-media">
+          ${c.image_url?`<img src="${esc(c.image_url)}" alt="${esc(c.name||"Cooperativa")}">`:""}
+        </div>
+        <div>
+          <div class="cat">${esc(c.type||"Cooperativa")}</div>
+          <h3>${esc(c.name||"")}</h3>
+          <p>${esc(c.description||"")}</p>
+          <strong>Conheça →</strong>
+        </div>
+      </div>
+    ` : `<div class="home-empty">Cadastre uma cooperativa para aparecer aqui.</div>`;
+  }
+
+  if($("homeBottomNews")){
+    const bottom=list.slice(4,7);
+    $("homeBottomNews").innerHTML=bottom.length
+      ? bottom.map(homeBottomArticle).join("")
+      : list.slice(1,4).map(homeBottomArticle).join("");
+  }
+}
+
 function render(){
   const s = DATA.settings || {};
 
@@ -503,25 +585,7 @@ function render(){
     setupHeroCarousel(arts);
   }
 
-  const side = arts.slice(1,3);
-
-  if($("heroSide")){
-    $("heroSide").innerHTML = side.map(a => `
-      <article class="side-story" onclick="openArticle(${Number(a.id) || 0})">
-        ${
-          a.image_url
-            ? `<img src="${esc(a.image_url)}" alt="">`
-            : ""
-        }
-
-        <div>
-          <div class="cat">${esc(a.category || "")}</div>
-          <h3>${esc(a.title || "")}</h3>
-          <p>${esc(a.summary || "")}</p>
-        </div>
-      </article>
-    `).join("");
-  }
+  renderHomeDashboard(arts);
 
   if($("newsGrid")){
     const news = arts
