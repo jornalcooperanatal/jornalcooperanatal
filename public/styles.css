@@ -659,9 +659,14 @@ button,input,select,textarea{
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:18px;
   width:100%;
+  align-items:stretch;
 }
 
 .coop-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height:100%;
   background:var(--paper);
   border:1px solid var(--line);
   overflow:hidden;
@@ -678,52 +683,74 @@ button,input,select,textarea{
   flex-direction:column;
 }
 
+/* =========================================================
+   TOPO/BANNER PADRÃO DAS COOPERATIVAS
+   TODAS AS IMAGENS FICAM COM A MESMA ALTURA
+   ========================================================= */
 
-.coop-media{
-  display:block;
-  width:100%;
-  background:transparent;
-}
-
+.coop-media,
 .coop-media-top{
-  width:100%;
-  min-height:0;
-  padding:0;
-  border-bottom:1px solid var(--line);
-  background:transparent !important;
-  overflow:hidden;
-}
-
-.coop-media-top img{
+  position:relative;
   display:block;
   width:100%;
-  height:auto;
-  max-width:none;
-  max-height:none;
+  height:138px;
+  min-height:138px;
+  max-height:138px;
   margin:0;
   padding:0;
-  object-fit:contain;
-  object-position:center;
-  background:transparent;
+  overflow:hidden;
   border:0;
-  box-shadow:none;
-  filter:none;
+  border-bottom:1px solid var(--line);
+  background:#ececec;
+  isolation:isolate;
 }
 
+/*
+  A arte cadastrada sempre preenche o topo inteiro.
+  Não importa se o arquivo original é 500x500, 1600x500,
+  2000x1000 etc.
+*/
+.coop-media img,
+.coop-media-top img{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none !important;
+  max-height:none !important;
+  min-width:100%;
+  min-height:100%;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  filter:none !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+}
+
+/* fallback quando não houver imagem */
 .coop-placeholder{
-  width:90px;
-  height:90px;
+  position:absolute;
+  inset:0;
   display:grid;
   place-items:center;
-  border-radius:50%;
+  width:100%;
+  height:100%;
   background:#e9edf2;
   color:#183b63;
+  border-radius:0;
   font:900 40px Georgia,"Times New Roman",serif;
 }
 
 .coop-body{
   display:flex;
   flex-direction:column;
+  flex:1 1 auto;
+  min-height:0;
   padding:16px 18px 18px;
 }
 
@@ -852,6 +879,13 @@ button,input,select,textarea{
     grid-template-columns:1fr;
   }
 
+  /* no celular continua padronizado, só um pouco mais baixo */
+  .coop-media,
+  .coop-media-top{
+    height:118px;
+    min-height:118px;
+    max-height:118px;
+  }
 
   .coop-body{
     padding:15px;
@@ -866,7 +900,6 @@ button,input,select,textarea{
     line-height:1.62;
   }
 }
-
 
 /* =========================================================
    BOTÕES
@@ -2071,3 +2104,44 @@ details p{
   text-align:center;
   font-size:13px;
 }
+
+/* =========================================================
+   GARANTIA FINAL — PADRÃO ÚNICO DOS TOPOS DAS COOPERATIVAS
+   ========================================================= */
+
+#cooperativas .coop-card .coop-media,
+#cooperativas .coop-card .coop-media-top{
+  width:100% !important;
+  height:138px !important;
+  min-height:138px !important;
+  max-height:138px !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:hidden !important;
+}
+
+#cooperativas .coop-card .coop-media img,
+#cooperativas .coop-card .coop-media-top img{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  min-width:100% !important;
+  min-height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+}
+
+@media(max-width:650px){
+  #cooperativas .coop-card .coop-media,
+  #cooperativas .coop-card .coop-media-top{
+    height:118px !important;
+    min-height:118px !important;
+    max-height:118px !important;
+  }
+}
+
