@@ -139,7 +139,7 @@ export default {
     const coopPromise=getCooperatives(env,true);
     const [s,a,l,c,f,ads]=await Promise.all([
      env.DB.prepare("SELECT * FROM settings WHERE id=1").first(),
-     env.DB.prepare("SELECT * FROM articles WHERE status='publicado' ORDER BY featured DESC, published_at DESC, id DESC").all(),
+     env.DB.prepare("SELECT articles.*, COALESCE((SELECT count FROM analytics WHERE event_type='article' AND item_id=articles.id),0) AS views FROM articles WHERE status='publicado' ORDER BY featured DESC, published_at DESC, id DESC").all(),
      env.DB.prepare("SELECT * FROM links WHERE active=1 ORDER BY id DESC").all(),
      coopPromise,
      env.DB.prepare("SELECT * FROM faqs ORDER BY id").all(),
